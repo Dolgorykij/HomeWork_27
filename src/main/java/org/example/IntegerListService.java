@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class IntegerListService implements IntegerList{
 
-    private final Integer[] massive;
+    private Integer[] massive;
     private int size;
 
 
@@ -31,6 +31,7 @@ public class IntegerListService implements IntegerList{
 
     @Override
     public Integer add(Integer item) {
+        grow();
         massive[size] = item;
         checkItemIsNull(item);
         size ++;
@@ -39,6 +40,7 @@ public class IntegerListService implements IntegerList{
 
     @Override
     public Integer add(int index, Integer item) {
+        grow();
         checkItemIsNull(item);
         if (index == size) {
             massive[size++] = item;
@@ -112,7 +114,7 @@ public class IntegerListService implements IntegerList{
     @Override
     public boolean contains(Integer item) {
         Integer[] massiveCopy = toArray();
-        sortInsertion(massiveCopy);
+        sortNew(massiveCopy);
         return binary(massiveCopy,item);
         //int itemIndex = containsItem(item);
         //if (item == null) {
@@ -169,11 +171,7 @@ public class IntegerListService implements IntegerList{
 
     @Override
     public boolean isEmpty() {
-        if (size == 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return size == 0;
     }
 
     @Override
@@ -193,10 +191,10 @@ public class IntegerListService implements IntegerList{
                 ", size=" + size +
                 '}';
     }
-    private static void swapElements(Integer [] arr, int indexA, int indexB) {
-        int tmp = arr[indexA];
-        arr[indexA] = arr[indexB];
-        arr[indexB] = tmp;
+    private static void swapElements(Integer [] massive, int indexA, int indexB) {
+        int tmp = massive[indexA];
+        massive[indexA] = massive[indexB];
+        massive[indexB] = tmp;
     }
 
     //public static void sortBubble(Integer [] massive) {
@@ -219,17 +217,20 @@ public class IntegerListService implements IntegerList{
     //      swapElements(massive, i, minElementIndex);
     //  }
     //}
-    public static void sortInsertion(Integer[] massive) {
-        for (int i = 1; i < massive.length; i++) {
-            int temp = massive[i];
-            int j = i;
-            while (j > 0 && massive[j - 1] >= temp) {
-                massive[j] = massive[j - 1];
-                j--;
-            }
-            massive[j] = temp;
-        }
+    private static void sortNew (Integer[] massive) {
+        quickSort(massive,0,massive.length - 1);
     }
+    //public static void sortInsertion(Integer[] massive) {
+        //for (int i = 1; i < massive.length; i++) {
+            //int temp = massive[i];
+            //int j = i;
+            //while (j > 0 && massive[j - 1] >= temp) {
+                //massive[j] = massive[j - 1];
+                //j--;
+            //}
+           // massive[j] = temp;
+        //}
+    //}
     public static boolean binary(Integer[] massive, Integer item) {
         int min = 0;
         int max = massive.length - 1;
@@ -249,5 +250,32 @@ public class IntegerListService implements IntegerList{
         }
         return false;
     }
+    private void grow () {
+        if (size == massive.length) {
+            massive = Arrays.copyOf(massive, size + size / 2);
+        }
+    }
+    private static int partition(Integer[] massive, int begin, int end) {
+        int pivot = massive[end];
+        int i = (begin - 1);
 
+        for (int j = begin; j < end; j++) {
+            if (massive[j] <= pivot) {
+                i++;
+
+                swapElements(massive, i, j);
+            }
+        }
+
+        swapElements(massive, i + 1, end);
+        return i + 1;
+    }
+    public static void quickSort(Integer[] massive, int begin, int end) {
+        if (begin < end) {
+            int partitionIndex = partition(massive, begin, end);
+
+            quickSort(massive, begin, partitionIndex - 1);
+            quickSort(massive, partitionIndex + 1, end);
+        }
+    }
 }
